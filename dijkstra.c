@@ -2,33 +2,6 @@
 #include <stdlib.h>
 #include "pq.h"
 
-// Structure for a vertex in the graph
-typedef struct vertex {
-    char label[50];      // Label for the vertex (e.g., city name)
-    double x, y;         // Coordinates or other data
-    void* extra;         // Pointer for Dijkstra's algorithm
-} vertex;
-
-// Structure for an edge in the graph
-typedef struct edge {
-    struct vertex* end1; // One endpoint of the edge
-    struct vertex* end2; // Other endpoint of the edge
-    double length;       // Length of the edge
-} edge;
-
-// Structure to represent a list of edges for a vertex
-typedef struct edgelist {
-    struct edge* edge;
-    struct edgelist* next;
-} edgelist;
-
-// Structure for a path in Dijkstra's algorithm
-typedef struct dijkstra_path {
-    struct vertex* vertex;
-    struct edge* edge;
-    double length;
-} dijkstra_path;
-
 // Dijkstra's algorithm implementation
 void dijkstra(vertex* start, vertex* end) {
     printf("Start: %s, End: %s\n", start->label, end->label);
