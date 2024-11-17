@@ -1,11 +1,29 @@
-#make file for pal.c
+# Make file for dijkstra
 
 CFILES = main.c dijkstra.c pq.c
-OFILES=$(CFILES:.c=.o)
-CC = mpicc 
+HFILES = dijkstra.h
+OFILES = $(CFILES:.c=.o)
 
-pal: $(OFILES)
+# Compiler
+CC = clang
+
+# Flags
+CFLAGS = -Wall 
+
+# Main target
+dijkstra: $(OFILES)
 	$(CC) -o dijkstra $(OFILES) $(CFLAGS)
 
+# Dependencies
+main.o: main.c $(HFILES)
+	$(CC) -c main.c $(CFLAGS)
+
+dijkstra.o: dijkstra.c $(HFILES)
+	$(CC) -c dijkstra.c $(CFLAGS)
+
+pq.o: pq.c
+	$(CC) -c pq.c $(CFLAGS)
+
+# Clean up
 clean:
 	/bin/rm -f dijkstra $(OFILES)
