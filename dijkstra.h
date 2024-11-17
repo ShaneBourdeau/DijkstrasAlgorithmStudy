@@ -7,9 +7,10 @@
 
 // Structure for a vertex in the graph
 typedef struct vertex {
-    char location[50];
+    char label [50];
     double lattitude;
     double longitude;
+  double *extra;
 } vertex;
 
 // Structure for an edge in the graph
@@ -17,6 +18,7 @@ typedef struct edge {
     struct vertex *end1;
     struct vertex *end2;
     char location;
+    double length;
 } edge;
 
 // Structure to represent a list of edges for a vertex
@@ -30,7 +32,7 @@ typedef struct dijkstraPath{
     struct vertex *vertex;
     struct edge *edge;
     double length;
-} dijkstra_path;
+} dijkstraPath;
 
 void dijkstra(vertex *start, vertex *end);
 void build_adj_list(vertex vertices[], edge edges[], edgelist *adjList[], int numVertices, int numEdges);

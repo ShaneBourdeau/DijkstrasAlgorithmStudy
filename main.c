@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
     // create array of vertices
     vertex vertices[numVertices];
     for (int i = 0; i < numVertices; i++){
-        fscanf(file, "%s %lf %lf", vertices[i].location, &vertices[i].lattitude, &vertices[i].longitude);
+        fscanf(file, "%s %lf %lf", vertices[i].label, &vertices[i].lattitude, &vertices[i].longitude);
     }
 
     // create array of edges
