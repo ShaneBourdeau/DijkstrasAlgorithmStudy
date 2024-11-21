@@ -1,40 +1,31 @@
-/*
-    Header file for dijkstra.c
-    Tyler Knapp and Shane Bourdeau
-*/
-#ifndef DIJKSTRA_H
-#define DIJKSTRA_H
+#ifndef HIGHWAY_GRAPH_H
+#define HIGHWAY_GRAPH_H
 
-// Structure for a vertex in the graph
-typedef struct vertex {
-    char label [50];
-    double lattitude;
-    double longitude;
-  double *extra;
-} vertex;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h> 
+#include <limits.h>
 
-// Structure for an edge in the graph
-typedef struct edge {
-    struct vertex *end1;
-    struct vertex *end2;
-    char location;
+typedef struct HighwayEdge {
+    char label[50];
     double length;
-} edge;
+    int dest;
+    int source;
+    struct HighwayEdge *next;
+} HighwayEdge;
 
-// Structure to represent a list of edges for a vertex
-typedef struct edgelist{
-    struct edge *edge;
-    struct edgelist *next;
-} edgelist;
+typedef struct HighwayVertex {
+    char label[50];
+    int vNum;
+    int visited;
+    HighwayEdge *head;
+} HighwayVertex;
 
-// Structure for a path in Dijkstra's algorithm
-typedef struct dijkstraPath{
-    struct vertex *vertex;
-    struct edge *edge;
-    double length;
-} dijkstraPath;
+typedef struct {
+    double totalDist;
+    HighwayEdge *lastEdge;
+} PQEntry;
 
-void dijkstra(vertex *start, vertex *end);
-void build_adj_list(vertex vertices[], edge edges[], edgelist *adjList[], int numVertices, int numEdges);
+void Dijkstra(HighwayVertex* vertices, int numVertices, int startIdx, int destIdx);
 
 #endif

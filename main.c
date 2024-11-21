@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "dijkstra.h"
 /*
     Reads in a TMG file to create a graph and runs Dijkstra's algorithm on it
@@ -25,31 +26,40 @@ int main(int argc, char *argv[]){
     fscanf(file, "%d %d", &numVertices, &numEdges);
 
     // create array of vertices
-    vertex vertices[numVertices];
+    HighwayVertex *vertices = (HighwayVertex*)malloc(numVertices * sizeof(HighwayVertex));
     for (int i = 0; i < numVertices; i++){
-        fscanf(file, "%s %lf %lf", vertices[i].label, &vertices[i].lattitude, &vertices[i].longitude);
+        vertices[i].vNum = i;
+        vertices[i].visited = 0;
+        vertices[i].head = NULL;
     }
 
-    // create array of edges
-    edge edges[numEdges];
-    for (int i = 1; i < numEdges; i++){
-        int end1, end2;
-        char location;
-        fscanf(file, "%d %d %c", &end1, &end2, &location);
-        edges[i].end1 = &vertices[end1];
-        edges[i].end2 = &vertices[end2];
-        edges[i].location = location;
+    // read in vertices
+    for (int i = 0; i < numVertices; i++){
+        fscanf(file, "%s", vertices[i].label);
     }
 
-    // create adjacency list
-    edgelist *adjList[numVertices];
-    build_adj_list(vertices, edges, adjList, numVertices, numEdges);
+    // // read in edges
+    // for (int i = 0; i < numEdges; i++){
+    //     int source, dest;
+    //     double length;
+    //     char label[50];
+    //     fscanf(file, "%d %d %lf %s", &source, &dest, &length, label);
+
+    //     // create new edge
+    //     HighwayEdge *newEdge = (HighwayEdge*)malloc(sizeof(HighwayEdge));
+    //     newEdge->source = source;
+    //     newEdge->dest = dest;
+    //     newEdge->length = length;
+    //     strcpy(newEdge->label, label);
+    //     newEdge->next = vertices[source].head;
+    //     vertices[source].head = newEdge;
+    // }
 
     // close file
     fclose(file);
 
     // run Dijkstra's algorithm
-    dijkstra(&vertices[0], &vertices[1]);
+    Dijkstra(vertices, numVertices, 0, numVertices - 1);
 
-    return 0;
+
 }

@@ -1,112 +1,66 @@
-/*
-	Implementation file for a min priority queue using singly linked list structure that holds ratio values
-
-	Jim Teresco, Siena College, CSIS 330, Spring 2012
-	edited by Michael Plekan
-  	Initial implementation:
-  	Fri Feb  3 11:02:04 EST 2012
-	Second implementation:
-	Fall 2021
-*/
-
-#include <stdlib.h>
 #include <stdio.h>
-#include "pq.h"
-/* create a new, empty, pq structure */
-pq * create_pq() {
+#include <stdlib.h>
+#include "dijkstra.h"
 
-  	pq *l = (pq *)malloc(sizeof(pq));
-	l->tail = NULL;
-	l->head= NULL;
-  	return l;
+typedef struct {
+    PQEntry *data;
+    int size;
+    int capacity;
+} PriorityQueue;
+
+PriorityQueue* createPQ(int capacity) {
+    PriorityQueue* pq = (PriorityQueue*)malloc(sizeof(PriorityQueue));
+    pq->data = (PQEntry*)malloc(capacity * sizeof(PQEntry));
+    pq->size = 0;
+    pq->capacity = capacity;
+    return pq;
 }
 
-/* check if the list is empty.  This is the case if the tail pointer is NULL */
-int pq_isempty(pq *l) {
-  	return l->tail == NULL;
+void swap(PQEntry* a, PQEntry* b) {
+    PQEntry temp = *a;
+    *a = *b;
+    *b = temp;
 }
 
-/*Searches through the list to put the new ratio in the correct spot for a min priority queue */
-extern void enqueue(pq *l, void *value, double priority){
-
-	pq_node *newnode = (pq_node *)malloc(sizeof(pq_node));
-  	newnode->value = value;
-	newnode->priority = priority;
-	if(l->head==NULL){
-  		l->tail = newnode;
-		l->head = newnode;
-	}
-	else{
-		pq_node *f=newnode;
-		double newVal,current;
-		newVal = newnode->priority;
-		if(l->head !=NULL){
-			current = l->head->priority;
-			if(newVal<current){
-					newnode->next=l->head;
-					l->head = newnode;
-					return;
-			}
-			f = l->head;
-  			while (f != NULL) {
-				if (f->next != NULL)current=f->next->priority;
-				else{
-						f->next = newnode;
-						l->tail=newnode;
-						break;
-				}
-				if(newVal<current){
-					newnode->next=f->next;
-					f->next = newnode;
-					break;
-				}
-    				f = f->next;
-  			}
-		}
-	}
+void heapifyUp(PriorityQueue* pq, int index) {
+    int parent = (index - 1) / 2;
+    if (index > 0 && pq->data[index].totalDist < pq->data[parent].totalDist) {
+        swap(&pq->data[index], &pq->data[parent]);
+        heapifyUp(pq, parent);
+    }
 }
 
-/* remove from the head of the list, return value removed */
-void *dequeue(pq *l) {
-
-  	if (l->tail == NULL) {
-    		fprintf(stderr, "(dequeue) Attempt to remove from empty list!\n");
-    		return 0;
-  	}
-
-  	void *retval =l->head->value;
-	struct pq_node *temp;
-	temp=l->head;
-	l->head=l->head->next;
-	
-	if(l->head==NULL)l->tail=NULL;
-	free(temp);
-  	return retval;
+void heapifyDown(PriorityQueue* pq, int index) {
+    int left = 2 * index + 1;
+    int right = 2 * index + 2;
+    int smallest = index;
+    
+    if (left < pq->size && pq->data[left].totalDist < pq->data[smallest].totalDist) {
+        smallest = left;
+    }
+    if (right < pq->size && pq->data[right].totalDist < pq->data[smallest].totalDist) {
+        smallest = right;
+    }
+    if (smallest != index) {
+        swap(&pq->data[index], &pq->data[smallest]);
+        heapifyDown(pq, smallest);
+    }
 }
 
-/* destroy a possibly non-empty list */
-void pq_destroy(pq *l) {
-  	pq_node *ptr = l->head;
-  	while (ptr) {
-    		pq_node *rmme = ptr;
-    		ptr = ptr->next;
-    		free(rmme);
-  	}
-  	free(l);
+void add(PriorityQueue* pq, PQEntry entry) {
+    if (pq->size == pq->capacity) {
+        pq->capacity *= 2;
+        pq->data = (PQEntry*)realloc(pq->data, pq->capacity * sizeof(PQEntry));
+    }
+    pq->data[pq->size] = entry;
+    heapifyUp(pq, pq->size);
+    pq->size++;
 }
 
-/* print the contents of a list */
-void pq_print_contents(pq *l) {
-
-  pq_node *f;
-	if(l->head !=NULL){
-		f = l->head;
-  		printf("<");
-  		while (f != NULL) {
-    			printf("%f",f->priority);
-    			f = f->next;
-    			if (f != NULL) printf(", ");
-  		}
-  		printf(">\n");
-	}
+PQEntry removeMin(PriorityQueue* pq) {
+    PQEntry min = pq->data[0];
+    pq->data[0] = pq->data[pq->size - 1];
+    pq->size--;
+    heapifyDown(pq, 0);
+    return min;
 }
