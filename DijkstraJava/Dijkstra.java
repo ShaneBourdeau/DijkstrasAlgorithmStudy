@@ -91,8 +91,8 @@ public class Dijkstra {
 	public static void main(String args[]) throws IOException {
 
 	// check for command-line parameters
-	if (args.length != 3 && args.length != 4) {
-		System.err.println("Usage: java Dijkstra numThreads graphfile start destination [pthfile]");
+	if (args.length != 4) {
+		System.err.println("Usage: java Dijkstra numThreads graphfile start destination");
 		System.exit(1);
 	}
 	
@@ -190,24 +190,6 @@ public class Dijkstra {
 		System.out.println("Travel from " + g.vertices[hop.source].label + " to " + g.vertices[hop.dest].label + " for " + df.format(hop.length) + " along " + hop.label + ", total " + df.format(totalLength));
 	}
 
-	// if there was an output filename given, also write in .pth format
-	if (args.length == 5) {
-		PrintWriter pw = new PrintWriter(args[4]);
-		pw.println("START " + start.label + " " + start.point);
-		for (int i = path.size() - 1; i >= 0; i--) {
-		HighwayEdge hop = path.get(i);
-		pw.print(hop.label + " ");
-		if (hop.shapePoints != null) {
-			for (int pNum = 0; pNum < hop.shapePoints.length; pNum++) {
-			pw.print(hop.shapePoints[pNum] + " ");
-			}
-		}
-		pw.println(g.vertices[hop.dest].label + " " + g.vertices[hop.dest].point);
-		}
-
-		pw.close();
-	}
-
 	// condense driving directions to ignore intersections where
 	// we do not change roads
 	System.out.println("Simplified directions:");
@@ -264,7 +246,9 @@ class WorkerThread extends Thread {
 		HighwayEdge e = destVertex.head;
 		while (e != null) {
 		if (!Dijkstra.g.vertices[e.dest].visited) {
-			Dijkstra.pq.add(new PQEntry(nextPQ.totalDist + e.length, e));
+			synchronized (Dijkstra.pq) {
+				Dijkstra.pq.add(new PQEntry(nextPQ.totalDist + e.length, e));
+			}
 			System.out.println("Thread " + threadId + " added " + e.length + " to " + Dijkstra.g.vertices[e.dest].label + " via " + e.label);
 		}
 		e = e.next;
