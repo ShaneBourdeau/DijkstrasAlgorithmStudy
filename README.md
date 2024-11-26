@@ -1,1 +1,2 @@
-# MPIDijkstrsAlgorithm
+# MPIDijkstrsAlgorithm  
+By Tyler and Shane
