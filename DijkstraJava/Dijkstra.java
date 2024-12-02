@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-
+import HighwayEdge;
 /**
  * non-public class to encapsulate a distance and an edge for use
  * as elements of the priority queue underlying Dijkstra's algorithm.
@@ -42,8 +43,8 @@ class PQEntry implements Comparable<PQEntry> {
      *
      * @param other the PQEntry to which this PQEntry is to be compared
      *
-     * @return -1 if this PQEntry's cumulative distance is smaller that other's<br>
-     *         1 if this PQEntry's cumulative distance is greater that other's<br>
+     * @return -1 if this PQEntry's cumulative distance is smaller than other's<br>
+     *         1 if this PQEntry's cumulative distance is greater than other's<br>
      *         0 if the cumulative distances are the same
      */
     @Override
@@ -59,27 +60,27 @@ class PQEntry implements Comparable<PQEntry> {
 /**
  * Computes shortest paths in a graph using Dijkstra's algorithm and Java threads.
  *
- * @author Orginal Verison: Jim Teresco
+ * @author Original Version: Jim Teresco
  * @author Modified for parallel version: Tyler Knapp and Shane Bourdeau
  */
 public class Dijkstra {
 
-	// global variables
+    // global variables
     public static int numThreads;
     public static Thread threads[];
-    public static ConcurrentLinkedQueue<PQEntry> pq = new ConcurrentLinkedQueue<>();
+    public static PriorityBlockingQueue<PQEntry> pq = new PriorityBlockingQueue<>();
     public static Map<String, HighwayEdge> result = new HashMap<>();
     public static AtomicBoolean found = new AtomicBoolean(false);
     public static HighwayGraph g;
     public static HighwayVertex dest;
-	public static ReentrantLock resultLock = new ReentrantLock();
+    public static ReentrantLock resultLock = new ReentrantLock();
 
     /**
      * The main method for the Dijkstra's algorithm driver program,
      * which will take command-line parameters of a graph to read,
      * starting and ending points for driving directions
      *
-     * @param args command-line parameters, which include<
+     * @param args command-line parameters, which include:
      *             args[0]: name of graph file<br>
      *             args[1]: starting waypoint label<br>
      *             args[2]: destination waypoint label<br>
@@ -92,13 +93,13 @@ public class Dijkstra {
             System.exit(1);
         }
 
-		// start timer
+        // start timer
         long startTime = System.currentTimeMillis();
-        
-		// initialize threads
-		numThreads = Integer.parseInt(args[0]);
 
-		// read the graph
+        // initialize threads
+        numThreads = Integer.parseInt(args[0]);
+
+        // read the graph
         Scanner s = new Scanner(new File(args[1]));
         g = new HighwayGraph(s);
         s.close();
@@ -127,7 +128,7 @@ public class Dijkstra {
         // initialize PQ with the places we can get to directly from the start vertex
         HighwayEdge e = start.head;
         while (e != null) {
-            if (g.vertices[e.dest] != null) { 
+            if (g.vertices[e.dest] != null) {
                 pq.add(new PQEntry(e.length, e));
             }
             e = e.next;
@@ -158,7 +159,7 @@ public class Dijkstra {
         while (!current.equals(start.label)) {
             HighwayEdge hop = result.get(current);
             if (hop == null) {
-				//if no path is found, print error and exit
+                //if no path is found, print error and exit
                 System.err.println("Graph is disconnected, no path from " + start.label + " to " + dest.label);
                 System.exit(1);
             }
@@ -166,11 +167,11 @@ public class Dijkstra {
             current = g.vertices[hop.source].label;
         }
 
-		// format the output
+        // format the output
         DecimalFormat df = new DecimalFormat("0.00");
-		double totalLength = 0.0;
-        
-		// print out the shortest path
+        double totalLength = 0.0;
+
+        // print out the shortest path
         System.out.println("Shortest Path:");
         int hopNum = path.size() - 1;
         totalLength = 0.0;
@@ -197,7 +198,7 @@ public class Dijkstra {
             }
         }
 
-		//end timer and print out the time taken to compute
+        //end timer and print out the time taken to compute
         long endTime = System.currentTimeMillis();
         System.out.println("Time taken to compute: " + (endTime - startTime) + "ms");
     }
@@ -209,70 +210,58 @@ public class Dijkstra {
  */
 class WorkerThread extends Thread {
 
-	//thread id
+    // thread id
     protected int threadId;
 
-	/**
-	 * Constructor for WorkerThread
-	 * @param threadId the id of the thread
-	 */
+    /**
+     * Constructor for WorkerThread
+     * @param threadId the id of the thread
+     */
     public WorkerThread(int threadId) {
-		//set the thread id
         this.threadId = threadId;
     }
 
-	/**
-	 * Process edges and add them to the priority queue
-	 */
+    /**
+     * Process edges and add them to the priority queue
+     */
     @Override
     public void run() {
         while (!Dijkstra.found.get()) {
-			//if there are no more edges to process, continue
             PQEntry nextPQ = Dijkstra.pq.poll();
-            if (nextPQ == null) {
-                continue;
-            }
-			//if the edge is null, continue
+            if (nextPQ == null) continue;
+
             HighwayEdge nextEdge = nextPQ.lastEdge;
-            if (nextEdge == null) {
-                continue;
-            }
-			//if the destination vertex is null, continue
+            if (nextEdge == null) continue;
+
             HighwayVertex destVertex = Dijkstra.g.vertices[nextEdge.dest];
-            if (destVertex == null) {
-                continue;
-            }
-			//if the destination vertex is already visited, continue and synchronize
-			synchronized (destVertex) {
-                if (destVertex.visited) {
-                    continue;
-                }
+            if (destVertex == null) continue;
+
+            // Synchronize on the visited flag for the vertex
+            synchronized (destVertex) {
+                if (destVertex.visited) continue;
                 destVertex.visited = true;
             }
-			//add the edge to the result map and lock map to prevent thread racing
+
+            // Lock the result map to add the new edge
             Dijkstra.resultLock.lock();
             try {
                 Dijkstra.result.put(destVertex.label, nextEdge);
             } finally {
-				//unlock the map
                 Dijkstra.resultLock.unlock();
             }
-			//if the destination vertex is the destination, set found to true and return
+
+            // If the destination vertex is found, set the found flag to true and stop
             if (destVertex.vNum == Dijkstra.dest.vNum) {
                 Dijkstra.found.set(true);
                 return;
             }
-			//add the edges of the destination vertex to the priority queue
+
+            // Add all edges from the destination vertex to the priority queue
             HighwayEdge e = destVertex.head;
             while (e != null) {
                 if (Dijkstra.g.vertices[e.dest] != null && !Dijkstra.g.vertices[e.dest].visited) {
-					//syncrhonize the priority queue to prevent thread racing, and print out what each thread added to the queue
-                    synchronized (Dijkstra.pq) {
-                        Dijkstra.pq.add(new PQEntry(nextPQ.totalDist + e.length, e));
-						System.out.println("Thread " + threadId +" to " + Dijkstra.g.vertices[e.dest].label + " via " + e.label);
-                    }
+                    Dijkstra.pq.add(new PQEntry(nextPQ.totalDist + e.length, e));
                 }
-				//move to the next edge
                 e = e.next;
             }
         }
