@@ -191,6 +191,9 @@ public class Dijkstra {
             System.out.println(g.vertices[hop.dest].label + " for " + df.format(sameRouteLength) + " miles along " + currentRoute);
             totalLength += sameRouteLength;
             hopNum--;
+            if (hopNum < 0) {
+                System.out.println("Total length: " + df.format(totalLength) + " miles");
+            }
         }
 
 		//end timer and print out the time taken to compute
