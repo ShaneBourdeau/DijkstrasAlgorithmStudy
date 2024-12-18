@@ -16,7 +16,7 @@
 2) run `java Dijkstra numThreads graphfile start destination`  
 
 `numThreads`: Number of threads  
-`graphfile`: name of graph file (.tmg)
-`start` Starting vertex label  
-`destination` Ending vertex label  
+`graphfile`: name of graph file (.tmg)  
+`start`: Starting vertex label  
+`destination`: Ending vertex label  
 
