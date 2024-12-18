@@ -80,9 +80,10 @@ public class Dijkstra {
      * starting and ending points for driving directions
      *
      * @param args command-line parameters, which include<
-     *             args[0]: name of graph file<br>
-     *             args[1]: starting waypoint label<br>
-     *             args[2]: destination waypoint label<br>
+     *             args[0]: number of threads<br>
+     *             args[1]: name of graph file<br>
+     *             args[2]: starting waypoint label<br>
+     *             args[3]: destination waypoint label<br>
      */
     public static void main(String args[]) throws IOException {
 

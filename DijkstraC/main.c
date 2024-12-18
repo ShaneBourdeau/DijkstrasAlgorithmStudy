@@ -1,11 +1,14 @@
+/*
+    Main program for Dijkstra's algorithm. This program reads in a file containing a graph of vertices 
+    and edges, and then runs Dijkstra's algorithm to find the shortest path between two vertices
+    
+    Tyler Knapp and Shane Bourdeau
+    Nov 1 2024
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "dijkstra.h"
-/*
-    Reads in a TMG file to create a graph and runs Dijkstra's algorithm on it
-    Tyler Knapp and Shane Bourdeau
-*/
 
 int main(int argc, char *argv[]){
     // check for correct number of arguments

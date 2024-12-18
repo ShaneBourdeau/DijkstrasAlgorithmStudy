@@ -1,3 +1,14 @@
+/*
+	Implementation file for a min priority queue using singly linked list structure that holds ratio values
+
+	Jim Teresco, Siena College, CSIS 330, Spring 2012
+	edited by Michael Plekan
+  	Initial implementation:
+  	Fri Feb  3 11:02:04 EST 2012
+	Second implementation:
+	Fall 2021
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "dijkstra.h"

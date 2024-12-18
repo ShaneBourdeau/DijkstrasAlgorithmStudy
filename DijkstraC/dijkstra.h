@@ -1,3 +1,9 @@
+/*
+    Header file for dijkstra.c
+    
+    Tyler Knapp and Shane Bourdeau
+    Nov 1 2024
+*/
 #ifndef HIGHWAY_GRAPH_H
 #define HIGHWAY_GRAPH_H
 

@@ -1,3 +1,9 @@
+/*
+    Computes Dijkstra's alogrthim to find the shortest path between two vertices in a graph.
+
+    Tyler Knapp and Shane Bourdeau
+    Nov 1 2024
+*/
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -1,4 +1,6 @@
-# Make file for dijkstra
+# Make file for DijkstraC
+#
+# Tyler Knapp and Shane Bourdeau
 
 CFILES = main.c dijkstra.c pq.c
 HFILES = dijkstra.h
