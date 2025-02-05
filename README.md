@@ -7,4 +7,4 @@
     <li>DijkstraC: Directory with implementation of Dijkstra's algorithm using C and MPI*</li>
 </ul>
 
-*<i>Not completed</i>
+*<i>DijkstraC is not completed</i>
